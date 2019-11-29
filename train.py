@@ -9,8 +9,10 @@ class LinearLearn:
         self.theta0 = 0.0
         self.old_theta0 = 1.0
         self.theta1 = 0.0
+        self.data_length = 0
         self.data = []
-        self.data_length = 1
+        self.scale_info = None
+        self.original_data = None
 
         self.error = 0.0000001
         self.learn_rate = 0.1
@@ -44,13 +46,24 @@ class LinearLearn:
         y_min = min(self.y)
         y_max = max(self.y)
         for i in range(self.data_length):
-            # x = (self.x[i] - x_min) / (x_max - x_min)
-            # y = (self.y[i] - y_min) / (y_max - y_min)
-            x = (self.x[i] - x_min)
-            y = (self.y[i] - y_min)
+            x = (self.x[i] - x_min) / (x_max - x_min)
+            y = (self.y[i] - y_min) / (y_max - y_min)
             new_data.append([x,y])
+        self.original_data = self.data
         self.data = new_data
+        self.scale_info = {"x_min": x_min, "x_max": x_max, "y_min": y_min, "y_max": y_max}
 
+    def descale(self):
+        x_1 = 0.2
+        x_2 = 0.4
+        y_1 = self.estimatePrice(x_1)
+        y_2 = self.estimatePrice(x_2)
+        x_1 = (x_1 * (self.scale_info["x_max"] - self.scale_info["x_min"])) + self.scale_info["x_min"]
+        x_2 = (x_2 * (self.scale_info["x_max"] - self.scale_info["x_min"])) + self.scale_info["x_min"]
+        y_1 = (y_1 * (self.scale_info["y_max"] - self.scale_info["y_min"])) + self.scale_info["y_min"]
+        y_2 = (y_2 * (self.scale_info["y_max"] - self.scale_info["y_min"])) + self.scale_info["y_min"]
+        self.theta1 = (y_1 - y_2) / (x_1 - x_2)
+        self.theta0 = y_2 - self.theta1 * x_2
 
 
     def calc_theta(self):
@@ -62,14 +75,12 @@ class LinearLearn:
             for dist, price in self.data:
                 val0 += self.estimatePrice(dist) - price
                 val1 += (self.estimatePrice(dist) - price) * dist
-            #
+
             # print("val   c", val0, "val m", val1)
             # print("theta c", self.theta0, "theta m", self.theta1)
-
             self.old_theta0 = self.theta0
             self.theta0 = self.theta0 - self.learn_rate * (val0 / self.data_length)
             self.theta1 = self.theta1 - self.learn_rate * (val1 / self.data_length)
-
             # print()
             # print("val   c", val0)
             # print("theta c", self.theta0)
@@ -82,7 +93,9 @@ class LinearLearn:
             json.dump(data, outfile)
 
     def plot(self):
-        self.x,self.y = zip(*self.data)
+        # self.x,self.y = zip(*self.data)
+        self.x,self.y = zip(*self.original_data)
+        print(self.original_data)
         plt.scatter(self.x,self.y)
 
         x_max = max(self.x)
@@ -93,23 +106,23 @@ class LinearLearn:
         plt.show()
 
 
-
 def main():
-
-    # estPrice = theta0 + (theata1 * dist)
-    # theta0 = learnRate * 1/m * SUM(estPrice(dist) - price)
-    # theta1 = learnRate * 1/m * SUM((estPrice(dist) - price)*dist)
-    # error = theta0_i  -  theta0_i-1
 
     linear = LinearLearn()
     linear.load_data()
+
     linear.scale_data()
     linear.calc_theta()
-    linear.write_values()
-    linear.plot()
 
-    print("numpy", np.polyfit(linear.x, linear.y, 1))
-    print(linear.theta1, linear.theta0)
+    linear.descale()
+
+    linear.write_values()
+    # linear.plot()
+    #
+    # x,y = zip(*linear.data)
+    #
+    # print("numpy", np.polyfit(x, y, 1))
+    # print(linear.theta1, linear.theta0)
 
 
 if __name__ == "__main__":
