@@ -21,7 +21,7 @@ class LinearLearn:
         return self.theta0 + (self.theta1 * dist)
 
     def load_data(self):
-        with open( "data.csv", 'r' ) as theFile:
+        with open("data.csv", 'r') as theFile:
             reader = csv.DictReader(theFile)
             for line in reader:
                 self.data.append([int(line["km"]), int(line["price"])])
@@ -65,7 +65,6 @@ class LinearLearn:
         self.theta1 = (y_1 - y_2) / (x_1 - x_2)
         self.theta0 = y_2 - self.theta1 * x_2
 
-
     def calc_theta(self):
         #data = [km, price]
         while self.min_error():
@@ -76,16 +75,9 @@ class LinearLearn:
                 val0 += self.estimatePrice(dist) - price
                 val1 += (self.estimatePrice(dist) - price) * dist
 
-            # print("val   c", val0, "val m", val1)
-            # print("theta c", self.theta0, "theta m", self.theta1)
             self.old_theta0 = self.theta0
             self.theta0 = self.theta0 - self.learn_rate * (val0 / self.data_length)
             self.theta1 = self.theta1 - self.learn_rate * (val1 / self.data_length)
-            # print()
-            # print("val   c", val0)
-            # print("theta c", self.theta0)
-            # print("val0div", val0 / self.data_length)
-            # print("learn", self.learn_rate * (val0 / self.data_length))
 
     def write_values(self):
         data = {"theta0": self.theta0, "theta1": self.theta1}
@@ -93,14 +85,12 @@ class LinearLearn:
             json.dump(data, outfile)
 
     def plot(self):
-        # self.x,self.y = zip(*self.data)
-        self.x,self.y = zip(*self.original_data)
+        self.x, self.y = zip(*self.original_data)
         print(self.original_data)
         plt.scatter(self.x,self.y)
 
         x_max = max(self.x)
         x = np.linspace(0, x_max)
-
         plt.plot(x, self.theta0 + (self.theta1 * x))
 
         plt.show()
@@ -109,7 +99,11 @@ class LinearLearn:
 def main():
 
     linear = LinearLearn()
-    linear.load_data()
+    try:
+        linear.load_data()
+    except:
+        print("There was an error loading the data")
+        exit()
 
     linear.scale_data()
     linear.calc_theta()
