@@ -15,7 +15,8 @@ def main():
     try:
         theta0, theta1 = loadvalues()
     except:
-        print("There was an issue loading theta values, please try rerunning the training program")
+        print("There was an issue loading theta values, please try re-running the training program")
+        exit()
 
     inputstr = ""
     while inputstr.lower().strip() != "exit":
@@ -25,8 +26,8 @@ def main():
             result = estimatePrice(theta0, theta1, float(inputstr))
             print("The estimate price is:", round(result,2))
         except:
-            print("There was an error, please try again")
+            print("There was an error")
 
 
-if __name__ == "__main__":
+ if __name__ == "__main__":
     main()
